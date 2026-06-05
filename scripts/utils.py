@@ -37,3 +37,75 @@ class Metrics:
                         f'{height:.1f}%', ha='center', va='bottom')
         plt.tight_layout()
         plt.show()
+
+
+## get most common words in reviews for each category
+
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from collections import Counter
+import string
+
+STOPWORDS_ADDITIONAL = set(['would',
+ 'service',
+ 'time',
+ 'good',
+ 'delivery',
+ 'get',
+ 'order',
+ 'one',
+ 'great',
+ 'company',
+ 'customer',
+ 'day',
+ 'really',
+ 'use',
+ 'back',
+ 'received',
+ 'ordered',
+ 'could',
+ 'still',
+ 'days',
+ 'like',
+ 'experience',
+ 'also',
+ 'even',
+ 'well',
+ 'got',
+ 'email',
+ 'arrived',
+ 'first',
+ 'money',
+ 'helpful',
+ '2',
+ 'made',
+ 'told',
+ 'recommend',
+ 'us',
+ 'easy',
+ 'however',
+ 'sent',
+ 'never',
+ 'new',
+ 'much',
+ 'always',
+ 'work',
+ 'phone',
+ 'quality',
+ 'product',
+ 'price',
+ 'said',
+ 'refund'])
+
+def preprocess_text(text):
+    # Lowercase
+    text = text.lower()
+    # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    # Tokenize
+    tokens = nltk.word_tokenize(text)
+    # Remove stopwords
+    stop_words = set(stopwords.words('english')).union(STOPWORDS_ADDITIONAL)
+    tokens = [word for word in tokens if word not in stop_words]
+    return tokens
