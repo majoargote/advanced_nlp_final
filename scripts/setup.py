@@ -26,7 +26,7 @@ def load_dataset_and_save_as_csv():
     df.head()
 
     #save data as pickle file for easier loading in future
-    df.to_pickle("data/trustpilot_reviews.pkl")
+    df.to_pickle("../data/trustpilot_reviews.pkl")
 
     return df
 
@@ -71,7 +71,7 @@ def main():
     filtered_media = filter_and_save_data(df, "Media & Publishing")
     one_dataframe = pd.concat([filtered_travel, filtered_media], ignore_index=True)
     # Save the combined dataframe to a CSV file
-    one_dataframe.to_csv("data/filtered_reviews.csv", index=False)
+    one_dataframe.to_csv("../data/filtered_reviews.csv", index=False)
     quick_data_check(one_dataframe)
 
 
