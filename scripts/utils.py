@@ -1,4 +1,6 @@
 
+import re
+
 from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, accuracy_score
 import matplotlib.pyplot as plt
 
@@ -109,3 +111,17 @@ def preprocess_text(text):
     stop_words = set(stopwords.words('english')).union(STOPWORDS_ADDITIONAL)
     tokens = [word for word in tokens if word not in stop_words]
     return tokens
+
+def preprocess_for_tfidf(text):
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    tokens = nltk.word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    tokens = [w for w in tokens if w not in stop_words]
+    return ' '.join(tokens)  # return string for TF-IDF vectorizer
+
+def preprocess_for_bert(text):
+    text = str(text).strip()
+    text = re.sub(r'<.*?>', '', text)   # remove HTML tags (noise)
+    text = re.sub(r'\s+', ' ', text)    # normalize whitespace
+    return text
