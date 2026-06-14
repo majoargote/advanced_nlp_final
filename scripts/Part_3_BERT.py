@@ -128,12 +128,15 @@ for percentage in training_percentages:
     print_balance(valid_labels, "Validation set")   
     
     num_labels = 5 
-
+    
+    use_early_stopping = len(train_texts) > 500  # only use when enough data
+    
     # Train on the full training split for this percentage
     _, _, valid_preds_bert = train_bert(
         train_texts, train_labels, valid_texts, valid_labels,
         num_train_epochs=10, # lower epochs for larger percentages to save time
         num_labels=num_labels,
+        early_stopping=use_early_stopping,
         output_dir=f'./tmp_bert_{percentage}'  # unique per iteration
     )
 
