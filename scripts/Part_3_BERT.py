@@ -132,7 +132,7 @@ for percentage in training_percentages:
     # Train on the full training split for this percentage
     _, _, valid_preds_bert = train_bert(
         train_texts, train_labels, valid_texts, valid_labels,
-        num_train_epochs=20,
+        num_train_epochs=10, # lower epochs for larger percentages to save time
         num_labels=num_labels,
         output_dir=f'./tmp_bert_{percentage}'  # unique per iteration
     )
