@@ -169,12 +169,10 @@ def main():
     #     freeze_encoder=True  # already in your function signature
     # )
 
-    use_early_stopping = len(train_texts) > 500  # only use when enough data
-
     _, _, valid_preds_bert = train_bert(
         small_texts, small_labels, valid_texts, valid_labels,
         num_train_epochs=20,
-        early_stopping=use_early_stopping,
+        early_stopping= False,
         num_labels=num_labels
 
         # defaults: 20 epochs, early stopping patience=3, lr=5e-5
