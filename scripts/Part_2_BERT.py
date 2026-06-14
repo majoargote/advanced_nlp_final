@@ -51,7 +51,8 @@ def tokenize(batch):
 
 
 def train_bert(train_texts, train_labels, valid_texts, valid_labels,
-               num_train_epochs=20, freeze_encoder=False, output_dir='./tmp_bert', num_labels=5):
+               num_train_epochs=20, freeze_encoder=False, output_dir='./tmp_bert', num_labels=5
+               , early_stopping=False):
     
     train_ds = to_hf_dataset(train_texts, train_labels)
     valid_ds = to_hf_dataset(valid_texts, valid_labels)  # now passing labels
@@ -90,8 +91,8 @@ def train_bert(train_texts, train_labels, valid_texts, valid_labels,
         train_dataset=train_ds,
         eval_dataset=valid_ds,       # needed for early stopping
         data_collator=DataCollatorWithPadding(tokenizer),
-        # callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
-        # stops if val loss doesn't improve for 5 consecutive epochs
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)] if early_stopping else None
+        # stops if val loss doesn't improve for 3 consecutive epochs
     )
 
     trainer.train()
@@ -168,9 +169,12 @@ def main():
     #     freeze_encoder=True  # already in your function signature
     # )
 
+    use_early_stopping = len(train_texts) > 500  # only use when enough data
+
     _, _, valid_preds_bert = train_bert(
         small_texts, small_labels, valid_texts, valid_labels,
         num_train_epochs=20,
+        early_stopping=use_early_stopping,
         num_labels=num_labels
 
         # defaults: 20 epochs, early stopping patience=3, lr=5e-5
@@ -205,4 +209,11 @@ The last run showed F1-score of 49.3% for the Bert model.
 
 With only 7 examples for validation set the F1 score is very unstable.  One single prediction changes the score by 14%.
 
+
+NOTE: Added an early stopping option to the train_bert function, which can be enabled by setting early_stopping=True. 
+This will stop training if the validation loss does not improve for 3 consecutive epochs.
+ This is useful when training on larger datasets to prevent overfitting and save time. 
+ Set to true only if the dataset is larger than 500 examples. When it is smaller than that, the model may not have enough data to learn effectively, and early stopping may not be beneficial.
+ For example, this 32 data point experiment is too small to use early stopping, as the model may not have enough data to learn effectively, and results are worse as stated above. 
+ Need it for the later experiments with larger datasets, so I added it as an option to the train_bert function.
 """
