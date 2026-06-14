@@ -4,10 +4,10 @@ a. BERT Model with Limited Data (0.5 points):
 Train a BERT-based model using only 32 labeled examples and assess its performance.
 
 """
-
+import shutil
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from transformers import AutoTokenizer, set_seed
+from transformers import AutoTokenizer
 import torch
 from utils import Metrics, preprocess_for_tfidf, preprocess_for_bert
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -19,17 +19,17 @@ from transformers import (
     Trainer,
     TrainingArguments,
     DataCollatorWithPadding,
+    EarlyStoppingCallback,
 )
 
 from datasets import Dataset as HFDataset
-from transformers import EarlyStoppingCallback
 
 def set_seed(seed=123):
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
 
-seed = 123
-set_seed(seed)
+SEED = 123
+set_seed(SEED)
 
 metrics_val = Metrics()
 
@@ -71,18 +71,13 @@ def train_bert(train_texts, train_labels, valid_texts, valid_labels,
     args = TrainingArguments(
         output_dir=output_dir,
         num_train_epochs=num_train_epochs,
-        # learning_rate=2e-5,  # instead of 5e-5
         learning_rate=5e-5,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=32,
-
-        # ## added some regularization and early stopping to help with tiny data
-        # weight_decay=0.01,        # L2 regularization
-        # warmup_ratio=0.1,         # gradual lr warmup
-
         save_strategy="epoch",
-        eval_strategy="epoch",       # evaluate every epoch
-        load_best_model_at_end=True, # restore best checkpoint
+        eval_strategy="epoch",
+        load_best_model_at_end=True,      # restores best checkpoint for predictions
+        save_total_limit=1,               # only keeps 1 checkpoint on disk at a time
         metric_for_best_model="eval_loss",
         greater_is_better=False,
         report_to="none",
@@ -104,7 +99,17 @@ def train_bert(train_texts, train_labels, valid_texts, valid_labels,
     preds = trainer.predict(valid_ds)
     valid_preds = preds.predictions.argmax(-1)
 
+    # Clean up checkpoints immediately after predictions - clean up disk space
+    shutil.rmtree(output_dir, ignore_errors=True)
+
     return model, preds, valid_preds
+
+def print_balance(labels, name):
+    counts = pd.Series(labels).value_counts().sort_index()
+    total = len(labels)
+    print(f"\n--- {name} ({total} samples) ---")
+    for cls, count in counts.items():
+        print(f"  Class {cls+1} ({count/total*100:.1f}%): {'█' * count} ({count})")
 
 def main():
     # Load data
@@ -121,16 +126,9 @@ def main():
     labels = (labeled_df['stars'].astype(int) - 1).tolist()
     # model expects 0-4 labels for 5 classes
 
-    def print_balance(labels, name):
-        counts = pd.Series(labels).value_counts().sort_index()
-        total = len(labels)
-        print(f"\n--- {name} ({total} samples) ---")
-        for cls, count in counts.items():
-            print(f"  Class {cls+1} ({count/total*100:.1f}%): {'█' * count} ({count})")
-
     # Single train/valid split — not enough data for 3 splits
     train_texts, valid_texts, train_labels, valid_labels = train_test_split(
-        texts, labels, test_size=0.2, stratify=labels, random_state=seed
+        texts, labels, test_size=0.2, stratify=labels, random_state=SEED
     )
 
     print_balance(train_labels, "Training set")
@@ -154,7 +152,7 @@ def main():
     limited_n = min(32, len(train_texts))  # cap at available data
     try:
         small_texts, _, small_labels, _ = train_test_split(
-            train_texts, train_labels, train_size=limited_n, stratify=train_labels, random_state=seed
+            train_texts, train_labels, train_size=limited_n, stratify=train_labels, random_state=SEED
         )
     except Exception:
         small_texts = train_texts[:limited_n]
