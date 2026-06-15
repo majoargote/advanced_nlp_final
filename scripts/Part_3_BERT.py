@@ -149,3 +149,18 @@ for percentage in training_percentages:
 plot_learning_curve(training_percentages, metrics_val.results)
 total_elapsed = time.time() - total_start
 print(f"\nTotal runtime: {format_time(total_elapsed)}")
+
+
+
+"""
+Write up of the learning curve plot to move to markdown:
+The learning curve shows how the model's performance (measured by metrics such as F1-Score and Accuracy) changes as the size of the training data increases. 
+It increases until plateauing at around 50% for both accuracy and F1-score. This indicates that the model benefits from more data up to a certain point, after which additional data yields diminishing returns in performance improvement.
+I see rapid gains early and diminishing returned after 50%. 
+This pattern occurs because BERT's pretrained representations are already quite powerful, allowing it to perform well even with limited data. 
+However, as the model sees more examples, it can fine-tune its understanding of the specific task, leading to improved performance. 
+Once the model has seen enough data to capture the underlying patterns, additional data contributes less to performance gains.
+The gap between F1-Score and Accuracy is larger at smaller percentages (25% at 1% data) and narrows as data increases. 
+This is because Accuracy can be inflated by the model predicting the majority class more often, while F1 penalizes poor performance on underrepresented classes equally. 
+As training data grows, the model sees sufficient examples of each star rating class, reducing this disparity.
+"""
