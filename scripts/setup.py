@@ -14,8 +14,14 @@ Also prints out some basic statistics about the dataset.
 """
 
 
+from pathlib import Path
+
 import pandas as pd
 from datasets import load_dataset
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data"
 
 def load_dataset_and_save_as_csv():
     # Load the dataset from Hugging Face
@@ -26,7 +32,8 @@ def load_dataset_and_save_as_csv():
     df.head()
 
     #save data as pickle file for easier loading in future
-    df.to_pickle("../data/trustpilot_reviews.pkl")
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_pickle(DATA_DIR / "trustpilot_reviews.pkl")
 
     return df
 
@@ -71,7 +78,8 @@ def main():
     filtered_media = filter_and_save_data(df, "Media & Publishing")
     one_dataframe = pd.concat([filtered_travel, filtered_media], ignore_index=True)
     # Save the combined dataframe to a CSV file
-    one_dataframe.to_csv("../data/filtered_reviews.csv", index=False)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    one_dataframe.to_csv(DATA_DIR / "filtered_reviews.csv", index=False)
     quick_data_check(one_dataframe)
 
 
