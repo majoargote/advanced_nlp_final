@@ -39,7 +39,7 @@ class Metrics:
                         f'{height:.1f}%', ha='center', va='bottom')
         plt.tight_layout()
         plt.show()
-        return fig
+        # return fig
 
 
 ## get most common words in reviews for each category
@@ -182,7 +182,7 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
         labels = batch["label"].to(device)
         
         with torch.no_grad():
-            outputs = model(**inputs).logits
+            outputs = model(**inputs)
             # Handle different output formats from compressed models
             if hasattr(outputs, 'logits'):
                 logits = outputs.logits
@@ -193,7 +193,7 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
             else:
                 raise ValueError(f"Unexpected output format: {type(outputs)}")
             
-            preds = torch.argmax(outputs, axis=-1)
+            preds = torch.argmax(logits, axis=-1)
             
             # Collect predictions and labels for metric calculation
             all_predictions.extend(preds.cpu().numpy())
@@ -207,6 +207,7 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
     emissions: float = tracker.stop()
     
     # Calculate macro metrics
+    accuracy = accuracy_score(all_labels, all_predictions)
     f1_macro = f1_score(all_labels, all_predictions, average='macro')
     precision_macro = precision_score(all_labels, all_predictions, average='macro')
     recall_macro = recall_score(all_labels, all_predictions, average='macro')
@@ -220,6 +221,7 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
         "cpu_memory_used (MB)": cpu_memory_used,
         "cpu_memory_peak (MB)": peak_cpu_memory,
         "carbon_footprint (kg CO2eq)": emissions,
+        "accuracy": accuracy,
         "f1_macro": f1_macro,
         "precision_macro": precision_macro,
         "recall_macro": recall_macro
