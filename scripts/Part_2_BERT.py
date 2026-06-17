@@ -257,4 +257,8 @@ This will stop training if the validation loss does not improve for 3 consecutiv
 
  Latest Change: We are using stratefied K-Fold cross-validation to evaluate the BERT model on the limited dataset. This approach ensures that each fold has a similar distribution of classes, which is important for small datasets. 
  The results from all folds are aggregated to provide a more robust estimate of the model's performance. Instead of validating on just 7 rows which is what we were doing before. This is addressing the point raised before that the F1 score is very unstable with only 7 examples in the validation set.
+ 
+Before the kfold approach, the accuracy was at 57%. It  was likely an artifact of a favorable split. 
+BERT with 32 examples now genuinely struggles. We see with the kfold validation 32% accuracy and 27% F1.
+This will serve as a baseline for the next experiments with data augmentation and synthetic data. 
  """
