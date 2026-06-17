@@ -1,0 +1,54 @@
+{
+  "original": {
+    "inference_speed (samples/sec)": 13.954482707492765,
+    "cpu_memory_used (MB)": 368.27955199999997,
+    "cpu_memory_peak (MB)": 1386.663936,
+    "carbon_footprint (kg CO2eq)": 4.927932329693547e-06,
+    "accuracy": 0.563543599257885,
+    "f1_macro": 0.5494028824435262,
+    "precision_macro": 0.5466584407648024,
+    "recall_macro": 0.5559265803259466,
+    "n_params": 109486085,
+    "n_test_samples": 2156,
+    "size_mb": 417.6796226501465
+  },
+  "unstructured_pruning": {
+    "inference_speed (samples/sec)": 14.173488185314303,
+    "cpu_memory_used (MB)": 60.21119999999996,
+    "cpu_memory_peak (MB)": 1135.550464,
+    "carbon_footprint (kg CO2eq)": 0.00021795382770908888,
+    "accuracy": 0.487012987012987,
+    "f1_macro": 0.4183737782999442,
+    "precision_macro": 0.4934805954468284,
+    "recall_macro": 0.4781692930392225,
+    "n_params": 109486085,
+    "size_mb": 417.6796226501465,
+    "n_test_samples": 2156
+  },
+  "dynamic_quantization": {
+    "inference_speed (samples/sec)": 9.69244842620781,
+    "cpu_memory_used (MB)": 0.0,
+    "cpu_memory_peak (MB)": 1678.557184,
+    "carbon_footprint (kg CO2eq)": 0.00031191330611832175,
+    "accuracy": 0.5533395176252319,
+    "f1_macro": 0.5443889628805065,
+    "precision_macro": 0.5459860913798392,
+    "recall_macro": 0.5467838444334323,
+    "n_params": 23874048,
+    "size_mb": null,
+    "n_test_samples": 2156
+  },
+  "distilled_student": {
+    "inference_speed (samples/sec)": 28.413683873065647,
+    "cpu_memory_used (MB)": 157.85984000000008,
+    "cpu_memory_peak (MB)": 2661.138432,
+    "carbon_footprint (kg CO2eq)": 0.00011052491260316692,
+    "accuracy": 0.5677179962894249,
+    "f1_macro": 0.5604828225353959,
+    "precision_macro": 0.5634311558193659,
+    "recall_macro": 0.5624643184396998,
+    "n_params": 66957317,
+    "size_mb": 255.43458652496338,
+    "n_test_samples": 2156
+  }
+}

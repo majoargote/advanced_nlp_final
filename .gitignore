@@ -1,6 +1,7 @@
 # project specific
 trustpilot_reviews.pkl
 bert_teacher_100/
+student_distilled/
 
 
 # Byte-compiled / optimized / DLL files
