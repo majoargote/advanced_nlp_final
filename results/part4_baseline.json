@@ -1,9 +1,9 @@
 {
   "original": {
-    "inference_speed (samples/sec)": 15.360027324955846,
-    "cpu_memory_used (MB)": 320.06963199999996,
-    "cpu_memory_peak (MB)": 1164.10368,
-    "carbon_footprint (kg CO2eq)": 9.762000187334965e-05,
+    "inference_speed (samples/sec)": 13.954482707492765,
+    "cpu_memory_used (MB)": 368.27955199999997,
+    "cpu_memory_peak (MB)": 1386.663936,
+    "carbon_footprint (kg CO2eq)": 4.927932329693547e-06,
     "accuracy": 0.563543599257885,
     "f1_macro": 0.5494028824435262,
     "precision_macro": 0.5466584407648024,
