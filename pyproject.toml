@@ -42,6 +42,7 @@ dependencies = [
     "ace-tools>=0.0",
     "wikipedia>=1.4.0",
     "duckduckgo-search>=8.0.2",
+    "prune>=0.0.1",
 ]
 
 [tool.hatch.build.targets.wheel]
