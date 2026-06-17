@@ -39,6 +39,8 @@ checkpoint = 'bert-base-uncased' # (classic BERT)
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 max_length = 64
 
+from sklearn.model_selection import StratifiedKFold
+import numpy as np
 
 def to_hf_dataset(texts, labels=None):
     data = {'review': list(texts)}
@@ -112,6 +114,53 @@ def print_balance(labels, name):
     for cls, count in counts.items():
         print(f"  Class {cls+1} ({count/total*100:.1f}%): {'█' * count} ({count})")
 
+def evaluate_with_kfold(texts, labels, n_splits=5, num_train_epochs=20,
+                         num_labels=5, label='BERT', early_stopping=False,
+                         extra_texts=None, extra_labels=None):
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    
+    texts = np.array(texts)
+    labels = np.array(labels)
+    
+    all_preds = []
+    all_true = []
+    
+    for fold, (train_idx, val_idx) in enumerate(skf.split(texts, labels)):
+        print(f"\n--- Fold {fold+1}/{n_splits} ---")
+        set_seed(SEED)
+        
+        fold_train_texts = texts[train_idx].tolist()
+        fold_train_labels = labels[train_idx].tolist()
+        fold_val_texts = texts[val_idx].tolist()
+        fold_val_labels = labels[val_idx].tolist()
+        
+        if extra_texts is not None and extra_labels is not None:
+            fold_train_texts = fold_train_texts + extra_texts
+            fold_train_labels = fold_train_labels + extra_labels
+            print(f"  Training size after concat: {len(fold_train_texts)}")
+        
+        print_balance(fold_train_labels, f"Fold {fold+1} train")
+        print_balance(fold_val_labels, f"Fold {fold+1} val")
+        
+        _, _, valid_preds = train_bert(
+            fold_train_texts, fold_train_labels,
+            fold_val_texts, fold_val_labels,
+            num_train_epochs=num_train_epochs,
+            num_labels=num_labels,
+            early_stopping=early_stopping,
+            output_dir=f'./tmp_bert_{label}_fold{fold}'
+        )
+        
+        all_preds.extend(valid_preds.tolist())
+        all_true.extend(fold_val_labels)
+    
+    metrics_val.run(all_true, all_preds, label)
+    print(f"\n=== {label} K-Fold Results ===")
+    for metric, score in metrics_val.results[label].items():
+        print(f"  {metric}: {score:.1f}%")
+    
+    return metrics_val.results[label]
+
 def main():
     # Load data
     df = pd.read_csv("../data/filtered_reviews.csv")
@@ -159,26 +208,17 @@ def main():
         small_texts = train_texts[:limited_n]
         small_labels = train_labels[:limited_n]
 
+    small_texts = np.array(small_texts)
+    small_labels = np.array(small_labels)
     print_balance(small_labels, "BERT training set (limited)")
 
-
-    # _, _, valid_preds_bert = train_bert(
-    #     small_texts, small_labels, valid_texts, valid_labels,
-    #     num_train_epochs=20,
-    #     num_labels=num_labels,
-    #     freeze_encoder=True  # already in your function signature
-    # )
-
-    _, _, valid_preds_bert = train_bert(
-        small_texts, small_labels, valid_texts, valid_labels,
-        num_train_epochs=20,
-        early_stopping= False,
-        num_labels=num_labels
-
-        # defaults: 20 epochs, early stopping patience=3, lr=5e-5
+    bert_kfold = evaluate_with_kfold(
+        small_texts, small_labels,
+        n_splits=5,
+        num_labels=num_labels,
+        label='BERT_limited'
     )
-    metrics_val.run(valid_labels, valid_preds_bert, 'BERT (limited)')
-
+    metrics_val.results['BERT_limited'] = bert_kfold
 
 if __name__ == "__main__":
     main()
@@ -214,4 +254,7 @@ This will stop training if the validation loss does not improve for 3 consecutiv
  Set to true only if the dataset is larger than 500 examples. When it is smaller than that, the model may not have enough data to learn effectively, and early stopping may not be beneficial.
  For example, this 32 data point experiment is too small to use early stopping, as the model may not have enough data to learn effectively, and results are worse as stated above. 
  Need it for the later experiments with larger datasets, so I added it as an option to the train_bert function.
-"""
+
+ Latest Change: We are using stratefied K-Fold cross-validation to evaluate the BERT model on the limited dataset. This approach ensures that each fold has a similar distribution of classes, which is important for small datasets. 
+ The results from all folds are aggregated to provide a more robust estimate of the model's performance. Instead of validating on just 7 rows which is what we were doing before. This is addressing the point raised before that the F1 score is very unstable with only 7 examples in the validation set.
+ """
