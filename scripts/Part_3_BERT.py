@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
-from scripts.Part_2_BERT import train_bert
+from scripts.Part_2_BERT import train_bert, evaluate_with_kfold
 from scripts.utils import Metrics, preprocess_for_tfidf, preprocess_for_bert
 import time
 
@@ -38,6 +38,8 @@ def set_seed(seed=123):
 SEED = 123
 set_seed(SEED)
 
+## define Path 
+PATH = Path(__file__).resolve().parents[1] / 'data'
 
 ## Initialize metrics and training percentages
 metrics_val = Metrics()
@@ -99,6 +101,7 @@ I will
 - record the results for each percentage, including metrics such as F1-Score and Accuracy
 - plot a learning curve based on the training data percentages to visualize how the model's performance changes as more data is used for training.
 - print the class distribution for each training percentage to ensure that the model is being trained on a representative sample of the data and to check for any potential class imbalance issues that could affect model performance.
+
 """
 for percentage in training_percentages:
     set_seed(SEED)  # reset at start of each iteration
@@ -163,4 +166,5 @@ Once the model has seen enough data to capture the underlying patterns, addition
 The gap between F1-Score and Accuracy is larger at smaller percentages (25% at 1% data) and narrows as data increases. 
 This is because Accuracy can be inflated by the model predicting the majority class more often, while F1 penalizes poor performance on underrepresented classes equally. 
 As training data grows, the model sees sufficient examples of each star rating class, reducing this disparity.
+
 """

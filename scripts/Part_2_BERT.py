@@ -13,6 +13,7 @@ from utils import Metrics, preprocess_for_tfidf, preprocess_for_bert
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
+from pathlib import Path
 
 from transformers import (
     AutoModelForSequenceClassification,
@@ -54,7 +55,7 @@ def tokenize(batch):
 
 def train_bert(train_texts, train_labels, valid_texts, valid_labels,
                num_train_epochs=20, freeze_encoder=False, output_dir='./tmp_bert', num_labels=5
-               , early_stopping=False):
+               , early_stopping=False, save_model_path=None):
     
     train_ds = to_hf_dataset(train_texts, train_labels)
     valid_ds = to_hf_dataset(valid_texts, valid_labels)  # now passing labels
@@ -102,10 +103,18 @@ def train_bert(train_texts, train_labels, valid_texts, valid_labels,
     preds = trainer.predict(valid_ds)
     valid_preds = preds.predictions.argmax(-1)
 
+    # Save permanently if path provided, before cleanup
+    if save_model_path is not None:
+        save_path = Path(save_model_path)
+        save_path.mkdir(parents=True, exist_ok=True)
+        trainer.model.save_pretrained(save_path)
+        tokenizer.save_pretrained(save_path)
+        print(f"Model saved to {save_path}")
+
     # Clean up checkpoints immediately after predictions - clean up disk space
     shutil.rmtree(output_dir, ignore_errors=True)
 
-    return model, preds, valid_preds
+    return trainer.model, preds, valid_preds
 
 def print_balance(labels, name):
     counts = pd.Series(labels).value_counts().sort_index()
@@ -116,7 +125,7 @@ def print_balance(labels, name):
 
 def evaluate_with_kfold(texts, labels, n_splits=5, num_train_epochs=20,
                          num_labels=5, label='BERT', early_stopping=False,
-                         extra_texts=None, extra_labels=None):
+                         extra_texts=None, extra_labels=None, save_model_path=None):
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
     
     texts = np.array(texts)
@@ -148,7 +157,8 @@ def evaluate_with_kfold(texts, labels, n_splits=5, num_train_epochs=20,
             num_train_epochs=num_train_epochs,
             num_labels=num_labels,
             early_stopping=early_stopping,
-            output_dir=f'./tmp_bert_{label}_fold{fold}'
+            output_dir=f'./tmp_bert_{label}_fold{fold}',
+            save_model_path=save_model_path
         )
         
         all_preds.extend(valid_preds.tolist())
@@ -257,4 +267,8 @@ This will stop training if the validation loss does not improve for 3 consecutiv
 
  Latest Change: We are using stratefied K-Fold cross-validation to evaluate the BERT model on the limited dataset. This approach ensures that each fold has a similar distribution of classes, which is important for small datasets. 
  The results from all folds are aggregated to provide a more robust estimate of the model's performance. Instead of validating on just 7 rows which is what we were doing before. This is addressing the point raised before that the F1 score is very unstable with only 7 examples in the validation set.
+ 
+Before the kfold approach, the accuracy was at 57%. It  was likely an artifact of a favorable split. 
+BERT with 32 examples now genuinely struggles. We see with the kfold validation 32% accuracy and 27% F1.
+This will serve as a baseline for the next experiments with data augmentation and synthetic data. 
  """
