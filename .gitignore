@@ -1,5 +1,8 @@
 # project specific
 trustpilot_reviews.pkl
+bert_teacher_100/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
