@@ -39,6 +39,7 @@ class Metrics:
                         f'{height:.1f}%', ha='center', va='bottom')
         plt.tight_layout()
         plt.show()
+        return fig
 
 
 ## get most common words in reviews for each category
@@ -125,3 +126,115 @@ def preprocess_for_bert(text):
     text = re.sub(r'<.*?>', '', text)   # remove HTML tags (noise)
     text = re.sub(r'\s+', ' ', text)    # normalize whitespace
     return text
+
+
+### Metrics for compressing model evaluation
+
+import time
+import psutil
+import os
+import gc
+import logging
+from codecarbon import EmissionsTracker
+from tqdm import tqdm
+import torch
+import numpy as np
+from sklearn.metrics import f1_score, precision_score, recall_score
+
+logging.getLogger("codecarbon").disabled = True
+
+# Improved helper function to measure inference speed and memory usage
+def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
+    model.to(device)
+    model.eval()
+    
+    # Clear memory and get baseline measurements
+    gc.collect()
+    if torch.cuda.is_available() and device != "cpu":
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats(device)
+        gpu_memory_baseline = torch.cuda.memory_allocated(device) / 1e6  # MB
+    
+    process = psutil.Process(os.getpid())
+    cpu_memory_baseline = process.memory_info().rss / 1e6  # MB
+    
+    # Start tracking
+    tracker = EmissionsTracker(project_name="bert_agnews", measure_power_secs=1)
+    tracker.start()
+    
+    start_time = time.time()
+    total_samples = len(dataset)
+    
+    # Collect all predictions and true labels for macro metrics
+    all_predictions = []
+    all_labels = []
+    
+    # Track peak memory during inference
+    peak_cpu_memory = cpu_memory_baseline
+    
+    # Evaluate in batches
+    for i in tqdm(range(0, total_samples, batch_size)):
+        batch = dataset[i: i + batch_size]
+        inputs = {
+            "input_ids": batch["input_ids"].to(device, dtype=torch.long),
+            "attention_mask": batch["attention_mask"].to(device, dtype=torch.long)
+        }
+        labels = batch["label"].to(device)
+        
+        with torch.no_grad():
+            outputs = model(**inputs).logits
+            # Handle different output formats from compressed models
+            if hasattr(outputs, 'logits'):
+                logits = outputs.logits
+            elif isinstance(outputs, torch.Tensor):
+                logits = outputs
+            elif isinstance(outputs, (tuple, list)) and len(outputs) > 0:
+                logits = outputs[0]
+            else:
+                raise ValueError(f"Unexpected output format: {type(outputs)}")
+            
+            preds = torch.argmax(outputs, axis=-1)
+            
+            # Collect predictions and labels for metric calculation
+            all_predictions.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+        
+        # Track peak CPU memory during inference
+        current_cpu_memory = process.memory_info().rss / 1e6
+        peak_cpu_memory = max(peak_cpu_memory, current_cpu_memory)
+    
+    end_time = time.time()
+    emissions: float = tracker.stop()
+    
+    # Calculate macro metrics
+    f1_macro = f1_score(all_labels, all_predictions, average='macro')
+    precision_macro = precision_score(all_labels, all_predictions, average='macro')
+    recall_macro = recall_score(all_labels, all_predictions, average='macro')
+    
+    # Final memory measurements
+    cpu_memory_final = process.memory_info().rss / 1e6  # MB
+    cpu_memory_used = peak_cpu_memory - cpu_memory_baseline
+    
+    metrics = {
+        "inference_speed (samples/sec)": total_samples / (end_time - start_time),
+        "cpu_memory_used (MB)": cpu_memory_used,
+        "cpu_memory_peak (MB)": peak_cpu_memory,
+        "carbon_footprint (kg CO2eq)": emissions,
+        "f1_macro": f1_macro,
+        "precision_macro": precision_macro,
+        "recall_macro": recall_macro
+    }
+    
+    # Add GPU memory metrics if using CUDA
+    if torch.cuda.is_available() and device != "cpu":
+        gpu_memory_peak = torch.cuda.max_memory_allocated(device) / 1e6  # MB
+        gpu_memory_current = torch.cuda.memory_allocated(device) / 1e6  # MB
+        gpu_memory_used = gpu_memory_peak - gpu_memory_baseline
+        
+        metrics.update({
+            "gpu_memory_used (MB)": gpu_memory_used,
+            "gpu_memory_peak (MB)": gpu_memory_peak,
+            "gpu_memory_current (MB)": gpu_memory_current
+        })
+    
+    return metrics
