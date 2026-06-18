@@ -2,6 +2,8 @@
 trustpilot_reviews.pkl
 bert_teacher_100/
 student_distilled/
+results/
+figures/
 
 
 # Byte-compiled / optimized / DLL files
