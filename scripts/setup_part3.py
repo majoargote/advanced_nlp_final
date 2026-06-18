@@ -2,9 +2,10 @@
 Data setup for Part 3: Full data set 1%, 10%, 25%, 50%, 75%, 100%
 """
 import pandas as pd
+from pathlib import Path
 
-
-OUTPUT_DIR = "../data/"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data"
 
 
 def filter_data(df, categories: list):
@@ -20,7 +21,7 @@ def cut_and_save_data(df, percentage):
     sampled_df = df.sample(n=num_rows, random_state=42)
     
     # Save the sampled dataframe to a CSV file
-    output_file = f"{OUTPUT_DIR}/filtered_reviews_{percentage}percent.csv"
+    output_file = f"{DATA_DIR}/filtered_reviews_{percentage}percent.csv"
     sampled_df.to_csv(output_file, index=False)
     print(f"Saved {percentage}% of data to {output_file}")
     return sampled_df
@@ -38,7 +39,7 @@ def quick_data_check(df):
 
 
 def main():
-    df = pd.read_pickle(f"{OUTPUT_DIR}/trustpilot_reviews.pkl")
+    df = pd.read_pickle(f"{DATA_DIR}/trustpilot_reviews.pkl")
     categories = ["Travel & Vacation", "Media & Publishing"]
     filtered_df = filter_data(df, categories)
     for percentage in [1, 10, 25, 50, 75, 100]:
