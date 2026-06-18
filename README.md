@@ -1,5 +1,7 @@
 # Advanced NLP Final Project
 
+Authors: Isabel Alvarez de Lugo, Camila Nuñez, Mariajosé Argote.
+
 This repository contains the code, notebooks, data artifacts, and saved models for the final Advanced NLP project.
 
 ## Project Layout
