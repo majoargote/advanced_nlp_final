@@ -474,3 +474,19 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+"""
+Writeup:
+
+The goal of this part of the exercise entailed using an LLM to geneate additional labeled training examples to address
+scarcity since we were only using 32 labeled examples, then measure whether this additional data emproves the BERT classifier decided form part a.
+
+How we generated the labeled examples:
+
+- We used OPENAI api (GPT-4O-MINI) TO GENERATE SYNTHETIC REVIEWS.
+- The data was generated conditional on both dimensions of the data: each start rating (1-5) and each category (Travel & Vacation and Media $ Publishing), so 
+genereation was done per category and per cell rather than per star alone.
+- Each prompt 
+
+"""
