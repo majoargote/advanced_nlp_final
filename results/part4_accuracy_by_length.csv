@@ -1,0 +1,5 @@
+Method,Acc (short reviews),Acc (long reviews),Long - short
+original,0.6057,0.5206,-0.0851
+unstructured_pruning,0.5101,0.4635,-0.0466
+dynamic_quantization,0.5965,0.5094,-0.0871
+distilled_student,0.6029,0.5318,-0.0711
