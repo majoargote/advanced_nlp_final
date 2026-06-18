@@ -224,7 +224,12 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
         "accuracy": accuracy,
         "f1_macro": f1_macro,
         "precision_macro": precision_macro,
-        "recall_macro": recall_macro
+        "recall_macro": recall_macro,
+        # Per-sample predictions/labels from the forward pass above, so callers can
+        # reuse them (e.g. confusion matrices) without re-running inference.
+        # Native python ints keep the dict JSON-serializable; strip before dumping if undesired.
+        "predictions": [int(p) for p in all_predictions],
+        "labels": [int(l) for l in all_labels],
     }
     
     # Add GPU memory metrics if using CUDA
