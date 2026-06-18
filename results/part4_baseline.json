@@ -1,13 +1,13 @@
 {
   "original": {
-    "inference_speed (samples/sec)": 11.059604169705318,
-    "cpu_memory_used (MB)": 411.93881599999986,
-    "cpu_memory_peak (MB)": 1485.549568,
-    "carbon_footprint (kg CO2eq)": 0.00011903445716694867,
-    "accuracy": 0.563543599257885,
-    "f1_macro": 0.5494028824435262,
-    "precision_macro": 0.5466584407648024,
-    "recall_macro": 0.5559265803259466,
+    "inference_speed (samples/sec)": 60.41864126852723,
+    "cpu_memory_used (MB)": 225.0506240000002,
+    "cpu_memory_peak (MB)": 1530.413056,
+    "carbon_footprint (kg CO2eq)": 7.849737755891534e-05,
+    "accuracy": 0.562152133580705,
+    "f1_macro": 0.5432335036141052,
+    "precision_macro": 0.5459725235385035,
+    "recall_macro": 0.5545309582073645,
     "n_params": 109486085,
     "n_test_samples": 2156
   }

@@ -1,5 +1,4 @@
 Method,Errors (n),1 away,2 away,3+ away,MAE
-original,941,764,132,45,0.5441
-unstructured_pruning,1106,778,227,101,0.7305
-dynamic_quantization,963,781,146,36,0.551
-distilled_student,932,768,123,41,0.5311
+original,954,776,139,39,0.5478
+unstructured_pruning,1259,727,312,220,0.9838
+distilled_student,981,813,132,36,0.5552
