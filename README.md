@@ -7,8 +7,8 @@ This repository contains the code, notebooks, data artifacts, and saved models f
 - `scripts/setup.py`: downloads the source dataset, filters the two target categories, and creates `data/trustpilot_reviews.pkl` and `data/filtered_reviews.csv`.
 - `scripts/setup_part3.py`: creates the Part 3 training-size CSV files such as `filtered_reviews_1percent.csv`, `filtered_reviews_10percent.csv`, and `filtered_reviews_100percent.csv`.
 - `scripts/eda.ipynb` has the data discovery section refered in `scripts/Part_1.ipynb`
-- `scripts/Part_2_BERT.py`, `scripts/Part_3_BERT.py`: script versions of the BERT experiments.
-- `scripts/Part_1.ipynb`, `scripts/Part_2_Augmentation.ipynb`, `scripts/Part_3.ipynb`, `scripts/Part_4_distillation_quantization.ipynb`: notebook versions of the project stages.
+- `scripts/Part_2_BERT.py`, `scripts/Part_3_BERT.py`: script versions of the BERT model used in each exercise.
+- `notebooks/Part_1.ipynb`, `notebooks/Part_2/part_2*.ipynb`, `notebooks/Part_3.ipynb`, `scripts/Part_4_distillation_quantization.ipynb`: notebooks for each exercise of the project.
 - `data/`: input data, cached checkpoints, and experiment outputs.
 - `models/`: saved teacher/student checkpoints.
 - `results/`: JSON, CSV, and NPZ outputs from the evaluation pipeline.
@@ -40,10 +40,10 @@ python scripts/setup_part3.py
 
 Recommended order:
 
-1. Run `scripts/Part_1.ipynb` for the initial analysis.
-2. Run `scripts/Part_2_Augmentation.ipynb` or `scripts/Part_2_BERT.py` for augmentation and BERT experiments.
-3. Run `scripts/Part_3.ipynb` or `scripts/Part_3_BERT.py` for the full-data learning curve.
-4. Run `scripts/Part_4_distillation_quantization.ipynb` for quantization, distillation, and error analysis.
+1. Run `notebooks/part_1.ipynb` for exercise 1 results and write up.
+2. Run  `notebooks/part_2/part_2*.ipynb` for exercise 2 parts results and write up.
+3. Run `notebooks/Part_3.ipynb` for exercise 3 results and writeup.
+4. Run `notebooks/Part_4_distillation_quantization.ipynb` for exercise 4 results and write up.
 
 ## Outputs
 
