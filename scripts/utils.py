@@ -176,7 +176,7 @@ def measure_inference_metrics(model, dataset, device="cpu", batch_size=32):
     cpu_memory_baseline = process.memory_info().rss / 1e6  # MB
 
     # Start tracking
-    tracker = EmissionsTracker(project_name="bert_agnews", measure_power_secs=1)
+    tracker = EmissionsTracker(project_name="bert_agnews", measure_power_secs=1, output_dir = "results")
     tracker.start()
 
     start_time = time.time()
